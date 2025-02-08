@@ -1,0 +1,52 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>SCADA Monitoring</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        function fetchHistoricalData() {
+            const startTime = document.getElementById("startTime").value;
+            const endTime = document.getElementById("endTime").value;
+
+            $.get(`/api/historicalData?startTime=${startTime}&endTime=${endTime}`, function (data) {
+                console.log("Received Data:", data);
+            });
+        }
+
+        let socket;
+
+        function openWebSocket() {
+            socket = new WebSocket("ws://localhost:5000/ws");
+
+            socket.onopen = function () {
+                console.log("WebSocket connection established.");
+            };
+
+            socket.onmessage = function (event) {
+                document.getElementById("dataDisplay").innerText = event.data;
+            };
+
+            socket.onclose = function () {
+                console.log("WebSocket connection closed.");
+            };
+
+            socket.onerror = function (error) {
+                console.error("WebSocket error: ", error);
+            };
+        }
+
+        window.onload = openWebSocket;
+    </script>
+</head>
+<body>
+    <h2>SCADA Dashboard</h2>
+    <p id="dataDisplay">Waiting for data...</p>
+    <label>Start Time:</label>
+    <input type="datetime-local" id="startTime">
+    <label>End Time:</label>
+    <input type="datetime-local" id="endTime">
+    <button onclick="fetchHistoricalData()">Fetch Data</button>
+</body>
+</html>
+
